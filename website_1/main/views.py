@@ -1,13 +1,32 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+
+from .forms import TaskForm
 from .models import Task
 
 def index (request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.order_by('deadline')
     return render (request, 'index.html', {'title':'Главная страница', 'tasks': tasks})
 
 def about (request):
-    return render(request, 'about.html ')
+    return render(request, 'about.html ', {'title': 'Создание задачи'})
+
+def create (request):
+    error = ''
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return  redirect('home')
+        else:
+            error = 'Форма введена неверно'
+    form = TaskForm()
+    context = {
+        'form': form,
+        'error': error
+
+    }
+    return render(request, 'create.html ',context)
 
 def homework (reqest):
     return HttpResponse ('<h1> Why Httpresponse, why not render????? <br> PS. Почему не сразу через render????</h1>'
